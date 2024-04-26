@@ -1,0 +1,7 @@
+aws-cdk-lib==2.128.0
+constructs
+boto3
+aws-cdk.aws-apigatewayv2-alpha
+aws-cdk.aws-apigatewayv2-integrations-alpha
+aws-cdk.aws-apigatewayv2-authorizers-alpha
+aws_cdk.aws_cognito_identitypool_alpha

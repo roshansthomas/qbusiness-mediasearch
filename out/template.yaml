@@ -1,0 +1,161 @@
+Description: "AmazonQBusinessMediaSearch Solution\n"
+Parameters:
+  KendraIndexId:
+    Type: String
+    Description: Kendra IndexID for the AmazonQ Kendra Index
+Resources:
+  QBusinessMediaSearchServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: AmazonQApplicationPermission
+          Effect: Allow
+          Principal:
+            Service: qbusiness.amazonaws.com
+          Action: sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Sid: AmazonQApplicationPutMetricDataPermission
+            Effect: Allow
+            Action:
+            - cloudwatch:PutMetricData
+            Resource: '*'
+            Condition:
+              StringEquals:
+                cloudwatch:namespace: AWS/QBusiness
+          - Sid: AmazonQApplicationDescribeLogGroupsPermission
+            Effect: Allow
+            Action:
+            - logs:DescribeLogGroups
+            Resource: '*'
+          - Sid: AmazonQApplicationCreateLogGroupPermission
+            Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            Resource:
+            - Fn::Sub: arn:aws:logs:us-east-1:${AWS::AccountId}:log-group:/aws/qbusiness/*
+          - Sid: AmazonQApplicationLogStreamPermission
+            Effect: Allow
+            Action:
+            - logs:DescribeLogStreams
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource:
+            - Fn::Sub: arn:aws:logs:us-east-1:${AWS::AccountId}:log-group:/aws/qbusiness/*:log-stream:*
+  QBusinessMediaSearchKendraRetrieverRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: QBusiness-KendraRetriever-${AWS::StackName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: AmazonQKendraAccessPermission
+          Effect: Allow
+          Principal:
+            Service: qbusiness.amazonaws.com
+          Action: sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Sid: KendraRetrieveAccess
+            Effect: Allow
+            Action:
+            - kendra:Retrieve
+            - kendra:DescribeIndex
+            Resource:
+              Fn::Sub: arn:aws:kendra:us-east-1:${AWS::AccountId}:index/${KendraIndexId}
+  LambdaIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: arn:aws:logs:*:*:*
+          - Effect: Allow
+            Action:
+            - qbusiness:CreateApplication
+            - qbusiness:CreateRetriever
+            Resource: '*'
+          - Effect: Allow
+            Action: iam:PassRole
+            Resource:
+              Fn::GetAtt:
+              - QBusinessMediaSearchServiceRole
+              - Arn
+          - Effect: Allow
+            Action: iam:PassRole
+            Resource:
+              Fn::GetAtt:
+              - QBusinessMediaSearchKendraRetrieverRole
+              - Arn
+  QBusinessModelLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      Content:
+        S3Bucket: cfn-deploy-189739289896-us-east-1
+        S3Key: package/9179c1e0a85c28e85cd23470b3ea1439
+      CompatibleRuntimes:
+      - python3.11
+  QMediaLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: lambda_function.lambda_handler
+      Role:
+        Fn::GetAtt:
+        - LambdaIAMRole
+        - Arn
+      Runtime: python3.11
+      Layers:
+      - Ref: QBusinessModelLayer
+      Timeout: 600
+      MemorySize: 128
+      Environment:
+        Variables:
+          AWS_DATA_PATH: /opt/model
+          AMAZONQ_APP_ROLE_ARN:
+            Fn::GetAtt:
+            - QBusinessMediaSearchServiceRole
+            - Arn
+          AMAZONQ_K_RETR_ROLE_ARN:
+            Fn::GetAtt:
+            - QBusinessMediaSearchKendraRetrieverRole
+            - Arn
+          AMAZONQ_KENDRADS_INDEXID:
+            Ref: KendraIndexId
+      Code:
+        S3Bucket: cfn-deploy-189739289896-us-east-1
+        S3Key: package/ccd9b8b9a46420053404feabd763d2d2
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+        - id: W89
+          reason: No VPC resources.
+        - id: W92
+          reason: No requirements to set reserved concurrencies.
