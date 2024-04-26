@@ -105,7 +105,7 @@ Resources:
               "build": {
                 "commands": [
                   "git clone https://github.com/roshansthomas/qbusiness-mediasearch.git",
-                  "cd qbusiness-mediasearch/web-app/cdk",
+                  "cd qbusiness-mediasearch/web_app/cdk",
                   "pip install -r requirements.txt",
                   "npm ci",
                   "cdk bootstrap",
