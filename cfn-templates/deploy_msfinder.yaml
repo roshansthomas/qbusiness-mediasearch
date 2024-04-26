@@ -107,9 +107,7 @@ Resources:
                   "git clone https://github.com/roshansthomas/qbusiness-mediasearch.git",
                   "cd qbusiness-mediasearch/web_app",
                   "pip install -r requirements.txt",
-                  "cd portal",
                   "npm run build",
-                  "cd ..",
                   "cdk deploy --require-approval never --all --parameters-file cfg.py "
                 ]
               }
