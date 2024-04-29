@@ -23,6 +23,7 @@ from aws_cdk import (
     Duration,
     aws_logs as logs,
     BundlingOptions,
+    CfnParameter
 )
 from aws_cdk.aws_cognito_identitypool_alpha import (
     IdentityPoolAuthenticationProviders,
@@ -64,13 +65,13 @@ CFN_OUTPUT_IDENTITY_POOL_ID = cfg.NAME_PREFIX + "-identity-pool-id"
 CFN_OUTPUT_S3_RESUMEBUCKET = cfg.NAME_PREFIX + "-s3-resumebucket"
 CFN_OUTPUT_APIGATEWAY = cfg.NAME_PREFIX + "-api-gateway"
 
-amazonq_app_id = CfnParameter(self, "AMAZONQ_APP_ID", type="String",
-    description="The QBusiness Application Id")
-
 class WebAppStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
+        
+        amazonq_app_id = CfnParameter(self, "AMAZONQ_APP_ID", type="String",
+            description="The QBusiness Application Id")
+        
         # Setting tags to all resources within the scope
         aws_cdk.Tags.of(scope).add(TAG_NAME_MODULE, MODULE_NAME)
 
