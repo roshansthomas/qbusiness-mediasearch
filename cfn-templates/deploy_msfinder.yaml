@@ -120,13 +120,49 @@ Resources:
             }
           }
         Type: NO_SOURCE
-      Triggers:
-        Webhook: true
-        FilterGroups:
-          - - Type: EVENT
-              Pattern: PUSH
-            - Type: HEAD_REF
-              Pattern: ^refs/heads/main$
+
+  TriggerBuildLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs14.x
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          const AWS = require('aws-sdk');
+          const codebuild = new AWS.CodeBuild();
+
+          exports.handler = async (event, context) => {
+            const projectName = event.ResourceProperties.ProjectName;
+            await codebuild.startBuild({ projectName }).promise();
+            return { PhysicalResourceId: context.logStreamName };
+          };
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CodeBuildAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codebuild:StartBuild
+                Resource: !GetAtt Project.Arn
+
+  TriggerBuild:
+    Type: Custom::TriggerBuild
+    Properties:
+      ServiceToken: !GetAtt TriggerBuildLambda.Arn
+      ProjectName: !Ref Project
 Outputs:
   ProjectName:
     Value: !Ref Project
