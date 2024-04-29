@@ -36,7 +36,7 @@ import cfg
 TAG_NAME_MODULE = "Module"
 MODULE_NAME = "Web Stack"
 
-UI_BUILD_PATH = "./portal/build"
+UI_BUILD_PATH = "./build"
 
 CDN_OAI_NAME = cfg.NAME_PREFIX + "_webapp_oai"
 CDN_NAME = cfg.NAME_PREFIX + "_webapp_cdn"
