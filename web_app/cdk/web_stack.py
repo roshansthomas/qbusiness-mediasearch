@@ -64,6 +64,8 @@ CFN_OUTPUT_IDENTITY_POOL_ID = cfg.NAME_PREFIX + "-identity-pool-id"
 CFN_OUTPUT_S3_RESUMEBUCKET = cfg.NAME_PREFIX + "-s3-resumebucket"
 CFN_OUTPUT_APIGATEWAY = cfg.NAME_PREFIX + "-api-gateway"
 
+amazonq_app_id = CfnParameter(self, "AMAZONQ_APP_ID", type="String",
+    description="The QBusiness Application Id")
 
 class WebAppStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
@@ -160,7 +162,7 @@ class WebAppStack(Stack):
             code=_lambda.Code.from_asset("lambda"),
             timeout=Duration.minutes(15),
             environment={
-                "AMAZONQ_APP_ID": cfg.AMAZONQ_APP_ID,
+                "AMAZONQ_APP_ID": amazonq_app_id,
                 "AMAZONQ_REGION": cfg.REGION
             }
         )
@@ -185,7 +187,7 @@ class WebAppStack(Stack):
             code=_lambda.Code.from_asset("lambda"),
             timeout=Duration.minutes(15),
             environment={
-                "AMAZONQ_APP_ID": cfg.AMAZONQ_APP_ID,
+                "AMAZONQ_APP_ID": amazonq_app_id,
                 "AMAZONQ_REGION": cfg.REGION
             }
         )

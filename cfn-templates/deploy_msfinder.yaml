@@ -114,7 +114,7 @@ Resources:
                   "pip install -r requirements.txt",
                   "npm install",
                   "npm run build",
-                  "cdk deploy --require-approval never --all --parameters-file cfg.py --parameters AMAZONQ_APP_ID=$QBUSINESS_APP_ID "
+                  "cdk deploy --require-approval never --all --parameters AMAZONQ_APP_ID=$QBUSINESS_APP_ID "
                 ]
               }
             }
