@@ -88,6 +88,7 @@ Resources:
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
         Type: LINUX_CONTAINER
+        QBusinessAppId: !Ref QBusinessAppId
       ServiceRole: !GetAtt ProjectRole.Arn
       Source:
         BuildSpec: |-
@@ -110,7 +111,7 @@ Resources:
                   "pip install -r requirements.txt",
                   "npm install",
                   "npm run build",
-                  "cdk deploy --require-approval never --all cdk deploy --context-json '{"AMAZONQ_APP_ID":"${QBusinessAppId}"}' --parameters-file cfg.py "
+                  "cdk deploy --require-approval never --all cdk deploy --context-json '{\"AMAZONQ_APP_ID\":\"${QBusinessAppId}\"}' --parameters-file cfg.py "
                 ]
               }
             }
