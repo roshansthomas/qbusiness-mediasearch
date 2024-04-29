@@ -120,6 +120,13 @@ Resources:
             }
           }
         Type: NO_SOURCE
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: ^refs/heads/main$
 Outputs:
   ProjectName:
     Value: !Ref Project
