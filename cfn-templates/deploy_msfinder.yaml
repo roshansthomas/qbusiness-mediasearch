@@ -124,19 +124,23 @@ Resources:
   TriggerBuildLambda:
     Type: AWS::Lambda::Function
     Properties:
-      Handler: index.handler
-      Runtime: nodejs14.x
+      Handler: index.lambda_handler
+      Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
         ZipFile: |
-          const AWS = require('aws-sdk');
-          const codebuild = new AWS.CodeBuild();
+          import boto3
+          import cfnresponse
 
-          exports.handler = async (event, context) => {
-            const projectName = event.ResourceProperties.ProjectName;
-            await codebuild.startBuild({ projectName }).promise();
-            return { PhysicalResourceId: context.logStreamName };
-          };
+          def lambda_handler(event, context):
+              codebuild = boto3.client('codebuild')
+              project_name = event['ResourceProperties']['ProjectName']
+              try:
+                  codebuild.start_build(projectName=project_name)
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, '')
+              except Exception as e:
+                  print(e)
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {}, '')
 
   LambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -161,8 +165,9 @@ Resources:
   TriggerBuild:
     Type: Custom::TriggerBuild
     Properties:
-      ServiceToken: !GetAtt TriggerBuildLambda.Arn
+      ServiceToken: !GetAtt TriggerBuildLambda.Arn      
       ProjectName: !Ref Project
+
 Outputs:
   ProjectName:
     Value: !Ref Project
