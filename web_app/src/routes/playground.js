@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { withAuthenticator, useAuthenticator } from '@aws-amplify/ui-react';
+import { withAuthenticator, useAuthenticator, Heading, View, Text } from '@aws-amplify/ui-react';
 import { ContentLayout, Header } from '@cloudscape-design/components';
 import Layout from "../layout";
 import * as Util from "../common/utility";
@@ -36,4 +36,31 @@ const Playground = () => {
         </ContentLayout></Layout>
     )
 }
-export default withAuthenticator(Playground);
+
+// Custom login component with warning message
+export const LoginHeader = () => {
+    return (
+        <View textAlign="center" padding="1rem">
+            <Heading level={3}>Login</Heading>
+            <Text
+                variation="warning"
+                as="div"
+                color="red"
+                fontWeight="bold"
+                padding="0.5rem"
+                marginTop="0.5rem"
+                backgroundColor="#fff3cd"
+                borderRadius="4px"
+                border="1px solid #ffeeba"
+            >
+                Warning: Login with Caution
+            </Text>
+        </View>
+    );
+};
+
+export default withAuthenticator(Playground, {
+    components: {
+        Header: LoginHeader
+    }
+});
