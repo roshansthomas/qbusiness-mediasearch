@@ -4,10 +4,12 @@ import { ContentLayout, Header } from '@cloudscape-design/components';
 import Layout from "../layout";
 import * as Util from "../common/utility";
 import Chat from "./component/chat";
+import Greeting from "../common/greeting";
+import { components, formFields } from "../common/authenticatorComponents";
 
 const Playground = () => {
     const portalTitle = "Amazon Q for Business";
-    const { signOut } = useAuthenticator((context) => [context.signOut]);
+    const { user, signOut } = useAuthenticator((context) => [context.user, context.signOut]);
     const [userInfo, setUserInfo] = React.useState(null);
 
     useEffect(() => {
@@ -29,11 +31,15 @@ const Playground = () => {
     return (
         <Layout key="applicant_component">
             <ContentLayout
-            header={<Header 
-            variant="h1"
-            >{portalTitle}</Header>}>
+            header={
+                <div>
+                    <Header variant="h1">{portalTitle}</Header>
+                    <Greeting userInfo={userInfo} />
+                </div>
+            }>
             <Chat userinfo={userInfo} signOut={signOut}/>
         </ContentLayout></Layout>
     )
 }
-export default withAuthenticator(Playground);
+
+export default withAuthenticator(Playground, { components, formFields });
